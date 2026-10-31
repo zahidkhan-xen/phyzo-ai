@@ -1,21 +1,15 @@
 FROM node:20-slim
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends git ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-ARG REPO_URL=https://github.com/zahidkhan-xen/phyzo-ai.git
-RUN git clone --depth 1 "$REPO_URL" .
-
-WORKDIR /app/backend
-
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --include=dev
-RUN npm run build
+
+COPY backend/ ./
+RUN npm run build && npm prune --omit=dev
 
 ENV NODE_ENV=production
-ENV PORT=7860
+ENV PORT=8080
 ENV AI_PROVIDER=gemini
 ENV GEMINI_CHAT_MODEL=gemini-3.5-flash-lite
 ENV GEMINI_EMBEDDING_MODEL=gemini-embedding-001
@@ -26,6 +20,7 @@ ENV COOKIE_SAMESITE=none
 ENV MAX_PDF_MB=30
 ENV DAILY_MESSAGE_LIMIT=100
 ENV ENABLE_ATLAS_VECTOR_SEARCH=false
-EXPOSE 7860
+
+EXPOSE 8080
 
 CMD ["npm", "start"]

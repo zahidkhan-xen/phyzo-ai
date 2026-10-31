@@ -1,9 +1,9 @@
-# Deployment: Render + Vercel + MongoDB Atlas
+# Deployment: Back4App + Vercel + MongoDB Atlas
 
 This setup uses:
 
-- **Render** for the Express API (`backend/`)
-- **Vercel** for the Next.js frontend (`frontend/`)
+- **Back4App Containers** (free, no credit card) for the Express API
+- **Vercel** for the Next.js frontend
 - **MongoDB Atlas** free tier for the database and GridFS PDF storage
 - **Gemini free tier** for chat and embeddings
 
@@ -13,8 +13,7 @@ PDFs are stored in MongoDB GridFS, so the backend does not need a persistent dis
 
 - Frontend: https://phyzo-ai.vercel.app
 - Repository: https://github.com/zahidkhan-xen/phyzo-ai
-- Backend: pending Render deployment
-- Expected API URL: https://physics-ai-tutor-api.onrender.com/api
+- Backend: pending Back4App deployment
 
 ## 1. Create the MongoDB Atlas database
 
@@ -27,31 +26,26 @@ PDFs are stored in MongoDB GridFS, so the backend does not need a persistent dis
 mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/physics_ai_tutor?retryWrites=true&w=majority
 ```
 
-## 2. Deploy the backend on Render
+## 2. Deploy the backend on Back4App Containers
 
 1. Push this repository to GitHub.
-2. Open the Render Blueprint link:
-   https://render.com/deploy?repo=https://github.com/zahidkhan-xen/phyzo-ai.git
-3. Sign in with GitHub and approve the Blueprint.
-4. Render reads `render.yaml` and creates `physics-ai-tutor-api`.
-5. Fill the secret environment variables when prompted:
+2. Sign up at https://www.back4app.com/signup-containers using GitHub (no card).
+3. Create a new **Containers** app and connect `zahidkhan-xen/phyzo-ai`.
+4. Use the repository root and the root `Dockerfile`.
+5. Add these environment variables:
    - `MONGODB_URI` — Atlas connection string
    - `GEMINI_API_KEY` — free key from https://aistudio.google.com/api-keys
-   - `ADMIN_EMAILS` — your admin email
-   - `FRONTEND_URL` — temporarily `http://localhost:3000`; update after Vercel deploys
+   - `ADMIN_EMAILS` — `admin@physics.local`
+   - `FRONTEND_URL` — `https://phyzo-ai.vercel.app`
+   - `JWT_SECRET` — a long random string
 6. Deploy and wait for `/api/health` to return `{"status":"ok"}`.
-7. Copy the Render URL, for example:
+7. Copy the Back4App URL, for example:
 
 ```text
-https://physics-ai-tutor-api.onrender.com
+https://phyzo-ai-api.b4a.run
 ```
 
-If you prefer manual setup instead of the Blueprint, create a **Web Service** with:
-
-- Root directory: `backend`
-- Build command: `npm install --include=dev && npm run build`
-- Start command: `npm start`
-- Health check path: `/api/health`
+The root `Dockerfile` already sets the Gemini models, cookie settings, and port `8080`.
 
 ## 3. Deploy the frontend on Vercel
 
@@ -60,7 +54,7 @@ If you prefer manual setup instead of the Blueprint, create a **Web Service** wi
 3. Add an environment variable before deploying (already set for the current project):
 
 ```text
-NEXT_PUBLIC_API_URL=https://physics-ai-tutor-api.onrender.com/api
+NEXT_PUBLIC_API_URL=https://phyzo-ai-api.b4a.run/api
 ```
 
 4. Deploy and copy the Vercel URL, for example:
@@ -73,13 +67,13 @@ https://physics-ai-tutor.vercel.app
 
 ## 4. Connect the two services
 
-In Render, update:
+In Back4App, make sure:
 
 ```text
-FRONTEND_URL=https://physics-ai-tutor.vercel.app
+FRONTEND_URL=https://phyzo-ai.vercel.app
 ```
 
-Then redeploy the backend. This allows the Vercel origin through CORS.
+This allows the Vercel origin through CORS.
 
 The backend uses `COOKIE_SAMESITE=none` and `NODE_ENV=production`, so auth cookies are `Secure` and work across the two HTTPS domains.
 
@@ -94,7 +88,7 @@ The backend uses `COOKIE_SAMESITE=none` and `NODE_ENV=production`, so auth cooki
 ## 6. Verify
 
 ```bash
-curl https://physics-ai-tutor-api.onrender.com/api/health
+curl https://phyzo-ai-api.b4a.run/api/health
 ```
 
 Expected:
@@ -105,15 +99,15 @@ Expected:
 
 ## Free-tier notes
 
-- Render free services sleep after inactivity; the first request may take a while.
+- Back4App free containers sleep after inactivity; the first request may take a while.
 - If indexing is interrupted by a restart, the textbook is marked failed and can be reindexed.
 - Gemini free tier has rate limits. A `429` or `503` means wait and retry.
 - Atlas M0 has limited storage. GridFS PDFs and embeddings count toward it.
-- Vercel and Render both provide HTTPS, which is required for `SameSite=None` cookies.
+- Vercel and Back4App both provide HTTPS, which is required for `SameSite=None` cookies.
 
 ## Optional: custom domain
 
-1. Add the domain in Vercel and Render.
+1. Add the domain in Vercel and Back4App.
 2. Point DNS records as instructed by each provider.
-3. Update `FRONTEND_URL` in Render to the custom frontend origin.
+3. Update `FRONTEND_URL` in Back4App to the custom frontend origin.
 4. Update `NEXT_PUBLIC_API_URL` in Vercel to the custom API URL and redeploy.
