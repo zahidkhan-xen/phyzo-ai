@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: physics-ai-tutor-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_CHAT_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_EMBEDDING_MODEL
+        value: gemini-embedding-001
+      - key: GEMINI_EMBEDDING_DIMENSIONS
+        value: "768"
+      - key: GEMINI_MAX_OUTPUT_TOKENS
+        value: "2048"
+      - key: COOKIE_NAME
+        value: physics_token
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: ENABLE_ATLAS_VECTOR_SEARCH
+        value: "false"
+      - key: MAX_PDF_MB
+        value: "30"
+      - key: DAILY_MESSAGE_LIMIT
+        value: "100"
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
