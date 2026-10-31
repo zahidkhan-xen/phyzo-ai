@@ -9,6 +9,13 @@ This setup uses:
 
 PDFs are stored in MongoDB GridFS, so the backend does not need a persistent disk.
 
+## Current deployment
+
+- Frontend: https://phyzo-ai.vercel.app
+- Repository: https://github.com/zahidkhan-xen/phyzo-ai
+- Backend: pending Render deployment
+- Expected API URL: https://physics-ai-tutor-api.onrender.com/api
+
 ## 1. Create the MongoDB Atlas database
 
 1. Create a free **M0** cluster at https://www.mongodb.com/cloud/atlas.
@@ -23,15 +30,17 @@ mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/physics_ai_tutor?retryWrites=tru
 ## 2. Deploy the backend on Render
 
 1. Push this repository to GitHub.
-2. In Render, choose **New → Blueprint** and select the repository.
-3. Render reads `render.yaml` and creates `physics-ai-tutor-api`.
-4. Fill the secret environment variables when prompted:
+2. Open the Render Blueprint link:
+   https://render.com/deploy?repo=https://github.com/zahidkhan-xen/phyzo-ai.git
+3. Sign in with GitHub and approve the Blueprint.
+4. Render reads `render.yaml` and creates `physics-ai-tutor-api`.
+5. Fill the secret environment variables when prompted:
    - `MONGODB_URI` — Atlas connection string
    - `GEMINI_API_KEY` — free key from https://aistudio.google.com/api-keys
    - `ADMIN_EMAILS` — your admin email
    - `FRONTEND_URL` — temporarily `http://localhost:3000`; update after Vercel deploys
-5. Deploy and wait for `/api/health` to return `{"status":"ok"}`.
-6. Copy the Render URL, for example:
+6. Deploy and wait for `/api/health` to return `{"status":"ok"}`.
+7. Copy the Render URL, for example:
 
 ```text
 https://physics-ai-tutor-api.onrender.com
@@ -48,7 +57,7 @@ If you prefer manual setup instead of the Blueprint, create a **Web Service** wi
 
 1. In Vercel, import the same GitHub repository.
 2. Set **Root Directory** to `frontend`.
-3. Add an environment variable before deploying:
+3. Add an environment variable before deploying (already set for the current project):
 
 ```text
 NEXT_PUBLIC_API_URL=https://physics-ai-tutor-api.onrender.com/api
