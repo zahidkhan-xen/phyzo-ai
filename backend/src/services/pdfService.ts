@@ -1,6 +1,20 @@
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import { PDFParse } from "pdf-parse";
 import { ApiError } from "../utils/ApiError.js";
 import type { PdfPageText } from "../utils/text.js";
+
+const require = createRequire(import.meta.url);
+const bundledWorker = new URL("../pdf.worker.mjs", import.meta.url);
+
+PDFParse.setWorker(
+  existsSync(bundledWorker)
+    ? bundledWorker.href
+    : pathToFileURL(
+        require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs"),
+      ).href,
+);
 
 function normalizePdfText(text: string): string {
   return text
