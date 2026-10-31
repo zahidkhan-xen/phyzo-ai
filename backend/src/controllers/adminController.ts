@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
+import { env } from "../config/env.js";
 import { AnswerCache } from "../models/AnswerCache.js";
 import { Chunk } from "../models/Chunk.js";
 import { Conversation } from "../models/Conversation.js";
@@ -62,6 +63,15 @@ export async function uploadTextbook(
     throw error;
   }
 
+  if (env.SYNC_INDEXING) {
+    await indexTextbook(String(textbook._id));
+    res.status(202).json({
+      textbook: serializeTextbook(textbook.toObject()),
+      message: "Upload received and indexed.",
+    });
+    return;
+  }
+
   void indexTextbook(String(textbook._id)).catch((error) => {
     logger.error("Background textbook indexing failed", error);
   });
@@ -103,6 +113,15 @@ export async function reindexTextbook(
   textbook.progress = 0;
   textbook.error = undefined;
   await textbook.save();
+
+  if (env.SYNC_INDEXING) {
+    await indexTextbook(String(textbook._id));
+    res.json({
+      textbook: serializeTextbook(textbook.toObject()),
+      message: "Reindexing completed.",
+    });
+    return;
+  }
 
   void indexTextbook(String(textbook._id)).catch((error) => {
     logger.error("Background textbook reindexing failed", error);

@@ -64,6 +64,7 @@ const envSchema = z.object({
 
   ENABLE_ATLAS_VECTOR_SEARCH: booleanFromString,
   ATLAS_VECTOR_INDEX: z.string().default("vector_index"),
+  SYNC_INDEXING: booleanFromString,
 });
 
 const parsed = envSchema.safeParse(process.env);
